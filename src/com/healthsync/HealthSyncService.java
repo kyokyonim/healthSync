@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HealthSyncService {
-    List<TrackableItem> records = new ArrayList<>();
+    private final List<TrackableItem> records = new ArrayList<>();
 
     public void addRecord(TrackableItem item) {
         records.add(item);
@@ -20,9 +20,14 @@ public class HealthSyncService {
         }
         System.out.println("===== end =======\n");
     }
-    public void deleteRecord(TrackableItem item) {
-        records.remove(item);
-        System.out.println(item + "이 삭제 되었습니다.");
+    public boolean deleteRecord(TrackableItem item) {
+        boolean removed = records.remove(item);
+        if (removed) {
+            System.out.println("🗑️ 기록이 삭제되었습니다: " + item.getSummary());
+        } else {
+            System.out.println("⚠️ 삭제할 기록을 찾을 수 없습니다.");
+        }
+        return removed;
     }
     public void updateRecord(TrackableItem item) {
         records.set(records.indexOf(item), item);
@@ -33,6 +38,9 @@ public class HealthSyncService {
                 .map(item -> (ExerciseRecord) item)
                 .collect(Collectors.toList());
     }
+    public List<TrackableItem> getAllRecords() {
+        return List.copyOf(records);
+    }
     //특정 날짜 기록 조회
     public List<TrackableItem> getRecordsDate(LocalDate targetDate) {
         return records.stream()
@@ -42,7 +50,7 @@ public class HealthSyncService {
     public int calculateTotalWorkoutTime(){
         return records.stream()
                 .filter(item -> item instanceof ExerciseRecord)
-                .mapToInt(item -> ((ExerciseRecord) item).exerciseTime)
+                .mapToInt(item -> ((ExerciseRecord) item).getExerciseTime())
                 .sum();
     }
     public Optional<TrackableItem> getoneRecordsDate(LocalDate targetDate) {
